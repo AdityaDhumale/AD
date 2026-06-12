@@ -1,0 +1,41 @@
+10)Locally Weighted Regression Algorithm
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+def get_penalty_weights(query_x, X, tau):
+ m = X.shape[0]
+ W = np.mat(np.eye(m))
+ for i in range(m):
+     x = X[i]
+     W[i, i] = np.exp(
+         np.dot((x - query_x), (x - query_x).T) / (-2 * tau * tau)
+        )
+    return W*******
+def predict(X, y, query_x, tau):
+ m = X.shape[0]
+ X_transformed = np.hstack((np.reshape(X, (-1, 1)), np.ones((m, 1))))
+    query_x_transformed = np.mat([query_x, 1])
+    penalty_weights = get_penalty_weights(query_x_transformed, X_transformed, tau)
+    y_transformed = np.reshape(y, (-1, 1))
+    theta = np.linalg.pinv(
+        X_transformed.T * (penalty_weights * X_transformed)) * (X_transformed.T * (penalty_weights * y_transformed))
+    prediction = np.dot(query_x_transformed, theta)
+    return theta, prediction****
+data = pd.read_csv("./../../Data/curve.csv")**
+X = data.x.values
+y = data.y.values**
+plt.scatter(X, y)**
+tau = 0.1
+X_test = np.sort(np.random.randint(1, 100, size=X.shape[0]))
+predictions = []
+for query_instance in X_test:
+    theta, prediction = predict(X, y, query_instance, tau)
+    predictions.append(prediction.A[0][0])
+plt.scatter(X, y, color = 'blue', alpha=1.0, label="Actual")
+plt.plot(X_test, predictions, color='red', label="Predicted")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Locally Weighted Linear Regression with Tau set to {:.2f}".format(tau))
+plt.legend()
+plt.show()
