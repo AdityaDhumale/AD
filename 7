@@ -1,0 +1,75 @@
+7) HANDWRITTEN DIGITS PREDICTION USING VOTING
+CLASSIFICATION
+from sklearn.datasets import fetch_openml
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import LinearSVC
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, VotingClassifier
+from sklearn.neural_network import MLPClassifier
+******
+X_mnist, y_mnist = fetch_openml("mnist_784", return_X_y=True, as_frame=False)
+***
+X_mnist.shape
+***
+print(y_mnist)
+****
+y_mnist = y_mnist.astype("int")
+***
+X_train, X_test, y_train, y_test = train_test_split(
+    X_mnist, y_mnist,   # Feature values with target
+    test_size=10_000,   # Number of instances to seperate for testing
+    random_state=42,    # For reproducibility for operations that rely on randomness
+    stratify=y_mnist    # To ensure (near) equal class distribution across splits
+    )
+*****
+X_train, X_val, y_train, y_val = train_test_split(
+    X_train, y_train, test_size=10_000, random_state=42, stratify=y_train)
+*****
+print("Train set shape:", X_train.shape)
+print("Validation set shape:", X_val.shape)
+print("Test set shape:", X_test.shape)
+****
+X_mnist.max()
+***
+std_scaler = StandardScaler()
+X_train = std_scaler.fit_transform(X_train)
+X_val = std_scaler.transform(X_val)
+X_test = std_scaler.transform(X_test)
+****
+estimators = [
+    ("svc_clf", LinearSVC(tol=0.001, random_state=42)),
+    ("rf_clf", RandomForestClassifier(random_state=42)),
+    ("ex-tree_clf", ExtraTreesClassifier(random_state=42)),
+    ("mlp_clf", MLPClassifier(random_state=42))
+    ]
+*****
+voting_clf = VotingClassifier(
+    estimators=estimators,
+    voting="hard",      
+    n_jobs=-1,          
+    verbose=True        
+    )
+******
+voting_clf.fit(X_train, y_train)
+***
+print("Validation Score of individual estimator in the voting classifier:")
+for estimator in voting_clf.estimators_:
+    print("\t{}: {}".format(estimator, estimator.score(X_val, y_val)))
+*****
+voting_clf.score(X_val, y_val)
+********
+print("Test Score of individual estimator in the voting classifier:")
+for estimator in voting_clf.estimators_:
+    print("\t{}: {}".format(estimator, estimator.score(X_test, y_test)))
+*****
+voting_clf.score(X_test, y_test)
+****
+voting_clf_2 = voting_clf.set_params(svc_clf="drop")
+voting_clf_2.voting = "soft"
+voting_clf_2.fit(X_train, y_train)
+*****
+voting_clf_2.estimators_
+*******
+voting_clf_2.score(X_val, y_val)
+***
+voting_clf_2.score(X_test, y_test)
