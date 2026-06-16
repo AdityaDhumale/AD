@@ -1,0 +1,67 @@
+N Queen Problem using Backtracking technique.
+import java.util.Scanner;
+public class nQueens {
+	  static boolean isAttack(int i,int j,int board[][],int N){
+	 	 int k,l;
+	    	for(k=1;k<=i-1;k++){
+	      		if(board[k][j]==1)
+	        			return true;
+	    	}
+	    	k = i-1;
+	    	l = j+1;
+	    	while(k>=1 && l<=N){
+	      		if(board[k][l]==1)
+	        			return true;
+	      		k = k+1;
+	      		l = l+1;
+	    	}
+	    	k = i-1;
+	    	l = j-1;
+	    	while(k>=1 && l>=1){
+	      		if(board[k][l]==1)
+	        			return true;
+	      		k = k-1;
+	      		l = l-1;
+	    	}
+	    	return false;
+	  }
+	  static boolean nqueen(int row,int n,int N,int board[][]){
+	  	if(n==0){
+	      		return true;
+	    	}
+	    	for(int j=1;j<=N;j++){
+	      		if(!isAttack(row,j,board,N)){
+	        			board[row][j]=1;
+	      
+	        		if(nqueen(row+1,n-1,N,board))
+	          			return true;
+	      	}
+	      	board[row][j]=0;
+	  }
+	  return false;
+}
+	 
+ public static void main(String[] args) {
+	    Scanner sc = new Scanner(System.in);
+	    int n=4;
+	    int board[][] = new int[5][5];
+	    for(int i=0;i<=n;i++){
+	    	for(int j=0;j<=n;j++){
+	        		board[i][j]=0;
+	      	}
+	    }
+	    nqueen(1,4,4,board);
+	    for(int i=1;i<=n;i++){
+	    	for(int j=1;j<=n;j++){
+	        		System.out.print(board[i][j]+" ");
+	      	}
+	      	System.out.println();
+	    }
+}
+}
+
+Output:
+0 1 0 0 
+0 0 0 1 
+1 0 0 0 
+0 0 1 0
